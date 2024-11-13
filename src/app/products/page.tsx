@@ -1,12 +1,48 @@
 "use client";
 
+import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+
 import { Button, Card, Col, Row } from "antd";
 import Meta from "antd/es/card/Meta";
-import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+
+import { getProducts } from "@/services/product";
 
 function Products() {
   const router = useRouter();
+
+  const products = [
+    {
+      id: "1",
+      name: "Cây cỏ",
+      scientific_name: "Cây cỏ khoa học",
+      price: 1020,
+      stock: 10
+    },
+    {
+      id: "2",
+      name: "Cây lài",
+      scientific_name: "Cây lài khoa học",
+      price: 1010,
+      stock: 10
+    },
+    {
+      id: "3",
+      name: "Cây đu đủ",
+      scientific_name: "Cây đủ khoa học",
+      price: 15360,
+      stock: 10
+    }
+  ];
+  // const [products, setProducts] = useState([]);
+
+  // useEffect(() => {
+  //   const fetchApi = async () => {
+  //     const products = await getProducts();
+  //     setProducts(products);
+  //   }
+  //   fetchApi();
+  // }, []);
 
   const [id, setId] = useState("1");
 
@@ -25,7 +61,7 @@ function Products() {
         }}>Products</h1>
 
         <Row gutter={[16, 32]}>
-          {[...Array(6)].map(item => (
+          {products.length && products.map(item => (
             <>
               <Col span={6}>
                 <Card
@@ -38,12 +74,24 @@ function Products() {
                     />
                   }
                 >
-                  <Meta title="Cây cỏ" description="Teen khoa hoc" />
+                  <Meta
+                    title={item.name}
+                    description={item.scientific_name}
+                  />
 
                   <h3 style={{
                     color: "red",
+                    fontWeight: "bold",
+                    marginTop: "10px"
+                  }}>
+                    Price: {item.price}000 vnd
+                  </h3>
+                  <h3 style={{
+                    color: "red",
                     fontWeight: "bold"
-                  }}>100k</h3>
+                  }}>
+                    Stock: {item.stock}
+                  </h3>
 
                   <div style={{
                     marginTop: "20px",
@@ -53,10 +101,12 @@ function Products() {
                     <Button
                       type="primary"
                       onClick={() => {
-                        // setId(item.id);
+                        setId(item.id);
                         handleClick();
                       }}
-                    >Detail</Button>
+                    >
+                      Detail
+                    </Button>
                   </div>
                 </Card>
               </Col>

@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import React, { useState } from "react";
 
@@ -57,6 +57,10 @@ function Header() {
     console.log(e);
   }
 
+  const handleLinkCart = () => {
+    router.push("/cart");
+  }
+
   return (
     <React.Fragment>
       <div className="header">
@@ -95,9 +99,12 @@ function Header() {
           </ul>
         </div>
         <div className="header-cart">
-          <FaShoppingCart style={{
-            fontSize: "25px"
-          }} />
+          <FaShoppingCart
+            style={{
+              fontSize: "25px"
+            }}
+            onClick={handleLinkCart}
+          />
         </div>
       </div>
     </React.Fragment>
