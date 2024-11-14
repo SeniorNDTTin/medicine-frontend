@@ -1,9 +1,12 @@
 "use client";
 
 import { Button, Col, Row } from "antd";
+import { useRouter } from "next/navigation";
 import React from "react";
 
 function Home() {
+  const router = useRouter();
+
   return (
     <React.Fragment>
       <div className="home" style={{ marginTop: 64, marginBottom: 64 }}>
@@ -17,7 +20,7 @@ function Home() {
                 <p className="intro__desc">Được phục vụ bạn là niềm hạnh phúc của chúng tôi</p>
                 <Button
                   type="primary"
-                  onClick={() => { }}
+                  onClick={() => router.push("/products")}
                 >
                   Tìm bệnh của tôi
                 </Button>

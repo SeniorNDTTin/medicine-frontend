@@ -4,26 +4,19 @@ import React, { useEffect, useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { Button, Modal, Table } from "antd";
+import { Button, Image, Modal, Table } from "antd";
 import GoBack from "@/components/ui/GoBack/page";
 
 import { getProduct } from "@/services/product";
 
-import { getCookie, setCookie } from "@/helpers/cookies";
+interface props {
+  params: {
+    id: string
+  }
+};
 
-function Cart() {
+function OrderDetail(props: props) {
   const router = useRouter();
-
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const showModal = () => {
-    setIsModalOpen(true);
-  };
-  const handleOk = () => {
-    setIsModalOpen(false);
-  };
-  const handleCancel = () => {
-    setIsModalOpen(false);
-  };
 
   // const [cart, setCart] = useState([]);
   // const [priceTotal, setPriceTotal] = useState(0);
@@ -104,31 +97,6 @@ function Cart() {
   return (
     <React.Fragment>
       <div style={{ padding: '0 50px', marginTop: 64, marginBottom: 64 }}>
-        <Modal title="Choose checkout type" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
-          <div style={{
-            display: "flex",
-            justifyContent: "center",
-            padding: "30px 0"
-          }}>
-            <Button
-              type="default"
-              style={{
-                marginRight: "30px"
-              }}
-              onClick={() => { }}
-            >
-              Cash on delivery
-            </Button>
-
-            <Button
-              type="primary"
-              onClick={() => router.push("/checkout")}
-            >
-              Checkout online
-            </Button>
-          </div>
-        </Modal>
-        
         <GoBack />
 
         <h1 style={{
@@ -137,7 +105,7 @@ function Cart() {
           marginBottom: "30px",
           fontWeight: "bold"
         }}>
-          Cart
+          Order
         </h1>
 
         <Table dataSource={cart} columns={columns} />
@@ -150,23 +118,9 @@ function Cart() {
         }}>
           Price Total: {priceTotal}000 vnd
         </h2>
-
-        <div style={{
-          display: "flex",
-          justifyContent: "center",
-          marginTop: "30px"
-        }}>
-          <Button
-            type="primary"
-            onClick={() => showModal()}
-          >
-            Checkout
-          </Button>
-        </div>
-
       </div>
     </React.Fragment>
   )
 }
 
-export default Cart;
+export default Order;

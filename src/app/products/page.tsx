@@ -7,11 +7,12 @@ import { Button, Card, Col, Row } from "antd";
 import Meta from "antd/es/card/Meta";
 
 import { getProducts } from "@/services/product";
+import Search from "antd/es/input/Search";
 
 function Products() {
   const router = useRouter();
 
-  const products = [
+  const [dataSource, setDataSource] = useState([
     {
       id: "1",
       name: "Cây cỏ",
@@ -33,21 +34,57 @@ function Products() {
       price: 15360,
       stock: 10
     }
-  ];
-  // const [products, setProducts] = useState([]);
+  ]);
+  const [products, setProducts] = useState([
+    {
+      id: "1",
+      name: "Cây cỏ",
+      scientific_name: "Cây cỏ khoa học",
+      price: 1020,
+      stock: 10
+    },
+    {
+      id: "2",
+      name: "Cây lài",
+      scientific_name: "Cây lài khoa học",
+      price: 1010,
+      stock: 10
+    },
+    {
+      id: "3",
+      name: "Cây đu đủ",
+      scientific_name: "Cây đủ khoa học",
+      price: 15360,
+      stock: 10
+    }
+  ]);
 
-  // useEffect(() => {
-  //   const fetchApi = async () => {
-  //     const products = await getProducts();
-  //     setProducts(products);
-  //   }
-  //   fetchApi();
-  // }, []);
+  useEffect(() => {
+    const fetchApi = async () => {
+      const products = await getProducts();
+
+      setDataSource(products);
+      setProducts(products);
+    }
+    fetchApi();
+  }, []);
 
   const [id, setId] = useState("1");
 
   const handleClick = () => {
     router.push(`/products/detail/${id}`);
+  }
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value === "") {
+      setProducts(dataSource);
+      return;
+    }
+
+    const regex = new RegExp(value, "i");
+    const products = dataSource.filter(item => regex.test(item.name));
+    setProducts(products);
   }
 
   return (
@@ -59,6 +96,24 @@ function Products() {
           marginBottom: "30px",
           fontWeight: "bold"
         }}>Products</h1>
+
+        <div style={{
+          display: "flex",
+          justifyContent: "center",
+          marginBottom: "30px"
+        }}>
+          <Search
+            placeholder="input search text"
+            allowClear
+            enterButton="Search"
+            size="large"
+            style={{
+              width: "50%"
+            }}
+            onChange={(e) => handleChange(e)}
+          />
+        </div>
+
 
         <Row gutter={[16, 32]}>
           {products.length && products.map(item => (

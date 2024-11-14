@@ -1,7 +1,29 @@
 .footer {
   padding: 20px;
-  display: flex;
-  justify-content: space-between;
   background-color: #fdba74;
   color: white;
+}
+
+.contact {
+  padding: 0 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.contact__link {
+  margin-top: 10px;
+  padding: 20px;
+  background-color: "red";
+  border-radius: 50%;
+  color: "#dddddd";
+}
+
+.contact__link:hover {
+  background-color: "blue";
+}
+
+.contact__icon svg {
+  font-size: 36px;
 }

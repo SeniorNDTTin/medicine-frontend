@@ -9,7 +9,6 @@ import { FaShoppingCart } from "react-icons/fa";
 
 import "./header.css";
 import { Button, Dropdown, MenuProps } from "antd";
-import Search from "antd/es/input/Search";
 
 const items: MenuProps['items'] = [
   {
@@ -49,14 +48,6 @@ function Header() {
     router.push("/types");
   }
 
-  const handleSearch = (e: string) => {
-    if (e === "") {
-      return;
-    }
-
-    console.log(e);
-  }
-
   const handleLinkCart = () => {
     router.push("/cart");
   }
@@ -88,13 +79,7 @@ function Header() {
               </Dropdown>
             </li>
             <li>
-              <Search
-                placeholder="input search text"
-                allowClear
-                enterButton="Search"
-                size="large"
-                onSearch={(e) => handleSearch(e)}
-              />
+              <Link href="/orders">Orders</Link>
             </li>
           </ul>
         </div>

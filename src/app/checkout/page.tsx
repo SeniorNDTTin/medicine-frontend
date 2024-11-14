@@ -4,22 +4,27 @@ import React, { useEffect, useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { Button, Modal, Table } from "antd";
+import { Button, Image, Modal, Table } from "antd";
 import GoBack from "@/components/ui/GoBack/page";
 
 import { getProduct } from "@/services/product";
 
 import { getCookie, setCookie } from "@/helpers/cookies";
+import { toast } from "react-toastify";
+import { generateVietQr } from "@/helpers/generate";
 
-function Cart() {
+function Checkout() {
   const router = useRouter();
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(true);
   const showModal = () => {
     setIsModalOpen(true);
   };
   const handleOk = () => {
     setIsModalOpen(false);
+
+    toast.success("Checkout success");
+    router.push("/orders");
   };
   const handleCancel = () => {
     setIsModalOpen(false);
@@ -104,31 +109,29 @@ function Cart() {
   return (
     <React.Fragment>
       <div style={{ padding: '0 50px', marginTop: 64, marginBottom: 64 }}>
-        <Modal title="Choose checkout type" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
+        <Modal
+          title="VietQR Checkout"
+          open={isModalOpen}
+          onOk={handleOk}
+          onCancel={handleCancel}
+        >
           <div style={{
             display: "flex",
             justifyContent: "center",
             padding: "30px 0"
           }}>
-            <Button
-              type="default"
-              style={{
-                marginRight: "30px"
-              }}
-              onClick={() => { }}
-            >
-              Cash on delivery
-            </Button>
-
-            <Button
-              type="primary"
-              onClick={() => router.push("/checkout")}
-            >
-              Checkout online
-            </Button>
+            <Image
+              src={
+                generateVietQr(1000,
+                  "thanh%20toan",
+                  "Nguyen%20Duong%20Trong%20Tin"
+                )
+              }
+              alt="Vietqr"
+            />
           </div>
         </Modal>
-        
+
         <GoBack />
 
         <h1 style={{
@@ -137,7 +140,7 @@ function Cart() {
           marginBottom: "30px",
           fontWeight: "bold"
         }}>
-          Cart
+          Checkout
         </h1>
 
         <Table dataSource={cart} columns={columns} />
@@ -160,13 +163,12 @@ function Cart() {
             type="primary"
             onClick={() => showModal()}
           >
-            Checkout
+            Open QR
           </Button>
         </div>
-
       </div>
     </React.Fragment>
   )
 }
 
-export default Cart;
+export default Checkout;
