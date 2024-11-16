@@ -137,8 +137,6 @@ function Cart() {
             <Text type="warning">Giỏ hàng trống</Text>
           </>
         )}
-
-
       </div>
     </React.Fragment>
   )
