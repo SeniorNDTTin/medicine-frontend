@@ -3,5 +3,5 @@ export const generateVietQr = (
   addInfo: string,
   accountName: string
 ) => {
-  return `https://img.vietqr.io/image/vietinbank-113366668888-compact2.jpg?amount=${amount}&${addInfo}&accountName=${accountName}"`;
+  return `https://img.vietqr.io/image/bidv-7411169464-compact2.jpg?amount=${amount}&${addInfo}&accountName=${accountName}"`;
 }

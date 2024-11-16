@@ -3,65 +3,31 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { Button, Card, Col, Row } from "antd";
+import { Button, Card, Col, Image, Row } from "antd";
 import Meta from "antd/es/card/Meta";
 
 import { getProducts } from "@/services/product";
 import Search from "antd/es/input/Search";
+import { getType } from "@/services/type";
+import { formatVND } from "@/helpers/formatCurrency";
 
 function Products() {
   const router = useRouter();
 
-  const [dataSource, setDataSource] = useState([
-    {
-      id: "1",
-      name: "Cây cỏ",
-      scientific_name: "Cây cỏ khoa học",
-      price: 1020,
-      stock: 10
-    },
-    {
-      id: "2",
-      name: "Cây lài",
-      scientific_name: "Cây lài khoa học",
-      price: 1010,
-      stock: 10
-    },
-    {
-      id: "3",
-      name: "Cây đu đủ",
-      scientific_name: "Cây đủ khoa học",
-      price: 15360,
-      stock: 10
-    }
-  ]);
-  const [products, setProducts] = useState([
-    {
-      id: "1",
-      name: "Cây cỏ",
-      scientific_name: "Cây cỏ khoa học",
-      price: 1020,
-      stock: 10
-    },
-    {
-      id: "2",
-      name: "Cây lài",
-      scientific_name: "Cây lài khoa học",
-      price: 1010,
-      stock: 10
-    },
-    {
-      id: "3",
-      name: "Cây đu đủ",
-      scientific_name: "Cây đủ khoa học",
-      price: 15360,
-      stock: 10
-    }
-  ]);
+  const [searchByName, setSearchByName] = useState("");
+  const [searchByDisease, setSearchByDisease] = useState("");
+
+  const [dataSource, setDataSource] = useState<any>([]);
+  const [products, setProducts] = useState<any>([]);
 
   useEffect(() => {
     const fetchApi = async () => {
       const products = await getProducts();
+
+      for (const item of products) {
+        const type = await getType(item.category_id);
+        item.typeDetail = type;
+      }
 
       setDataSource(products);
       setProducts(products);
@@ -69,21 +35,46 @@ function Products() {
     fetchApi();
   }, []);
 
-  const [id, setId] = useState("1");
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+  }, []);
 
-  const handleClick = () => {
+  const handleClick = (id: string) => {
     router.push(`/products/detail/${id}`);
   }
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChangeByName = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchByDisease("");
+    
     const value = e.target.value;
+    setSearchByName(value);
+
     if (value === "") {
       setProducts(dataSource);
       return;
     }
 
     const regex = new RegExp(value, "i");
-    const products = dataSource.filter(item => regex.test(item.name));
+    const products = dataSource.filter((item: any) => regex.test(item.name));
+    setProducts(products);
+  }
+
+  const handleChangeByDisease = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchByName("");
+    
+    const value = e.target.value;
+    setSearchByDisease(value);
+
+    if (value === "") {
+      setProducts(dataSource);
+      return;
+    }
+
+    const regex = new RegExp(value, "i");
+    const products = dataSource.filter((item: any) => regex.test(item.typeDetail.description));
     setProducts(products);
   }
 
@@ -95,7 +86,7 @@ function Products() {
           textAlign: "center",
           marginBottom: "30px",
           fontWeight: "bold"
-        }}>Products</h1>
+        }}>Danh Sách Sản Phẩm</h1>
 
         <div style={{
           display: "flex",
@@ -103,35 +94,62 @@ function Products() {
           marginBottom: "30px"
         }}>
           <Search
-            placeholder="input search text"
+            placeholder="Tìm kiếm theo tên"
             allowClear
-            enterButton="Search"
+            enterButton="Tìm"
             size="large"
             style={{
               width: "50%"
             }}
-            onChange={(e) => handleChange(e)}
+            value={searchByName}
+            onChange={(e) => handleChangeByName(e)}
+          />
+
+        </div>
+
+        <div style={{
+          display: "flex",
+          justifyContent: "center",
+          marginBottom: "30px"
+        }}>
+          <Search
+            placeholder="Tìm kiếm theo bệnh tật"
+            allowClear
+            enterButton="Tìm"
+            size="large"
+            style={{
+              width: "50%"
+            }}
+            value={searchByDisease}
+            onChange={(e) => handleChangeByDisease(e)}
           />
         </div>
 
-
         <Row gutter={[16, 32]}>
-          {products.length && products.map(item => (
+          {products.length && products.map((item: any) => (
             <>
               <Col span={6}>
                 <Card
                   hoverable
                   style={{ width: 240 }}
                   cover={
-                    <img
-                      alt="example"
-                      src="https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png"
+                    <Image
+                      alt={item.name}
+                      src={item.image}
+                      style={{
+                        width: "100%",
+                        aspectRatio: "4/3",
+
+                      }}
                     />
                   }
                 >
                   <Meta
                     title={item.name}
                     description={item.scientific_name}
+                    style={{
+                      height: "110px"
+                    }}
                   />
 
                   <h3 style={{
@@ -139,13 +157,13 @@ function Products() {
                     fontWeight: "bold",
                     marginTop: "10px"
                   }}>
-                    Price: {item.price}000 vnd
+                    Giá: {formatVND(item.price)}
                   </h3>
                   <h3 style={{
                     color: "red",
                     fontWeight: "bold"
                   }}>
-                    Stock: {item.stock}
+                    Số lượng: {item.stock}
                   </h3>
 
                   <div style={{
@@ -156,11 +174,10 @@ function Products() {
                     <Button
                       type="primary"
                       onClick={() => {
-                        setId(item.id);
-                        handleClick();
+                        handleClick(item.id);
                       }}
                     >
-                      Detail
+                      Xem
                     </Button>
                   </div>
                 </Card>

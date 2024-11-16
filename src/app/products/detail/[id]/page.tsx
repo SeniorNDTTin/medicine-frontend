@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
-import { Button, Card } from "antd";
+import { Button, Card, Image } from "antd";
 import Meta from "antd/es/card/Meta";
 
 import GoBack from "@/components/ui/GoBack/page";
@@ -12,6 +12,7 @@ import Link from "next/link";
 import Search from "antd/es/input/Search";
 import { toast } from "react-toastify";
 import { deleteCookie, getCookie, setCookie } from "@/helpers/cookies";
+import { formatVND } from "@/helpers/formatCurrency";
 
 interface props {
   params: {
@@ -22,31 +23,25 @@ interface props {
 function ProductDetail(props: props) {
   const id = props.params.id;
 
-  const product = {
-    id: "1",
-    name: "Cây cỏ",
-    scientific_name: "Cây cỏ khoa học",
-    other_name: "Cây rác",
-    price: 1020,
-    stock: 10,
-    type: "Cây thuốc",
-    origin: "Viet Nam",
-    expiry: "2030-01-01",
-    category_id: "M01"
-  };
+  const [product, setProduct] = useState<any>();
 
-  // const [product, setProduct] = useState();
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+  }, []);
 
-  // useEffect(() => {
-  //   const fetchApi = async () => {
-  //     const product = await getProduct(id);
-  //     const type = await getType(product.category_id);
-  //     product.type = type;
+  useEffect(() => {
+    const fetchApi = async () => {
+      const product = await getProduct(id);
+      const type = await getType(product.category_id);
+      product.type = type;
 
-  //     setProduct(product);
-  //   }
-  //   fetchApi();
-  // }, [id]);
+      setProduct(product);
+    }
+    fetchApi();
+  }, [id]);
 
   const handleAddToCart = (e: string) => {
     const quantity = parseInt(e);
@@ -103,7 +98,7 @@ function ProductDetail(props: props) {
           marginBottom: "30px",
           fontWeight: "bold"
         }}>
-          Product Detail
+          Chi Tiết Sản Phẩm
         </h1>
 
         <div style={{
@@ -119,15 +114,15 @@ function ProductDetail(props: props) {
                   width: "50%"
                 }}
                 cover={
-                  <img
+                  <Image
                     alt={product.name}
-                    src="https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png"
+                    src={product.image}
                   />
                 }
               >
                 <Meta
-                  title={`Name: ${product.name}`}
-                  description={`Scientific Name: ${product.scientific_name}`}
+                  title={`Tên: ${product.name}`}
+                  description={`Tên khoa học: ${product.scientific_name}`}
                 />
 
                 <h3 style={{
@@ -135,7 +130,7 @@ function ProductDetail(props: props) {
                   fontWeight: "bold",
                   marginTop: "10px"
                 }}>
-                  Price: {product.price}000 vnd
+                  Giá: {formatVND(product.price)}
                 </h3>
 
                 <h3 style={{
@@ -143,7 +138,7 @@ function ProductDetail(props: props) {
                   fontWeight: "bold",
                   marginTop: "10px"
                 }}>
-                  Stock: {product.stock}
+                  Số lượng: {product.stock}
                 </h3>
 
                 <Link href={`/types/${product.category_id}`}>
@@ -151,27 +146,30 @@ function ProductDetail(props: props) {
                     color: "green",
                     fontWeight: "bold"
                   }}>
-                    {product.type}
+                    {product.type ? product.type.name : ""}
                   </h4>
                 </Link>
               </Card>
             </>
           )}
 
-          <div style={{
-            display: "flex",
-            justifyContent: "center"
-          }}>
-            <Search
-              type="number"
-              min={1}
-              placeholder="input quantity"
-              allowClear
-              enterButton="Search"
-              size="large"
-              onSearch={(e) => handleAddToCart(e)}
-            />
-          </div>
+          {product && (
+            <div style={{
+              display: "flex",
+              justifyContent: "center"
+            }}>
+              <Search
+                type="number"
+                min={1}
+                max={product.stock}
+                placeholder="Số lượng"
+                allowClear
+                enterButton="Thêm vào giỏ hàng"
+                size="large"
+                onSearch={(e) => handleAddToCart(e)}
+              />
+            </div>
+          )}
         </div>
       </div>
     </React.Fragment>

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -9,36 +9,28 @@ import { FaShoppingCart } from "react-icons/fa";
 
 import "./header.css";
 import { Button, Dropdown, MenuProps } from "antd";
-
-const items: MenuProps['items'] = [
-  {
-    key: '1',
-    label: (
-      <Link href="https://www.antgroup.com">
-        Danh mục 1
-      </Link>
-    ),
-  },
-  {
-    key: '2',
-    label: (
-      <Link href="https://www.antgroup.com">
-        Danh mục 2
-      </Link>
-    ),
-  },
-  {
-    key: '3',
-    label: (
-      <Link href="https://www.antgroup.com">
-        Danh mục 3
-      </Link>
-    ),
-  },
-];
+import { getTypes } from "@/services/type";
 
 function Header() {
   const router = useRouter();
+
+  const [types, setTypes] = useState<any>({ items: [] });
+
+  useEffect(() => {
+    const fetchApi = async () => {
+      const result = await getTypes();
+      const menuItems = result.map((item: any, index: number) => ({
+        key: index + 1,
+        label: (
+          <Link href={`/types/detail/${item.id}`}>
+            {item.name}
+          </Link>
+        ),
+      }));
+      setTypes({ items: menuItems });
+    };
+    fetchApi();
+  }, []);
 
   const handleLinkToHome = () => {
     router.push('/');
@@ -71,15 +63,14 @@ function Header() {
             alignItems: "center"
           }}>
             <li>
-              <Link href="/products">Products</Link>
+              <Link href="/products">Sản phẩm</Link>
             </li>
             <li>
-              <Dropdown menu={{ items }} placement="bottomLeft">
-                <Button onClick={handleLinkType}>Types</Button>
-              </Dropdown>
-            </li>
-            <li>
-              <Link href="/orders">Orders</Link>
+              {types.items.length > 0 && (
+                <Dropdown menu={{ items: types.items }} placement="bottomLeft">
+                  <Button onClick={handleLinkType}>Loại</Button>
+                </Dropdown>
+              )}
             </li>
           </ul>
         </div>

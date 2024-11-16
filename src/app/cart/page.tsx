@@ -4,131 +4,97 @@ import React, { useEffect, useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { Button, Modal, Table } from "antd";
+import { Button, Image, Table } from "antd";
 import GoBack from "@/components/ui/GoBack/page";
+import { Typography } from 'antd';
+const { Text } = Typography;
 
 import { getProduct } from "@/services/product";
 
-import { getCookie, setCookie } from "@/helpers/cookies";
+import { getCookie } from "@/helpers/cookies";
+import { formatVND } from "@/helpers/formatCurrency";
 
 function Cart() {
   const router = useRouter();
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const showModal = () => {
-    setIsModalOpen(true);
-  };
-  const handleOk = () => {
-    setIsModalOpen(false);
-  };
-  const handleCancel = () => {
-    setIsModalOpen(false);
-  };
+  const [cart, setCart] = useState<any>([]);
+  const [priceTotal, setPriceTotal] = useState(0);
+  useEffect(() => {
+    const fetchApi = async () => {
+      const cart = [];
+      const myCart = JSON.parse(getCookie("my_cart"));
+      for (const item of myCart) {
+        const product = await getProduct(item.product_id);
 
-  // const [cart, setCart] = useState([]);
-  // const [priceTotal, setPriceTotal] = useState(0);
-  // useEffect(() => {
-  //   const fetchApi = async () => {
-  //     const cart = [];
-  //     const myCart = JSON.parse(getCookie("my_cart"));
-  //     for (const item of myCart) {
-  //       const product = await getProduct(item.product_id);
+        const cartItem = {
+          key: item.product_id,
+          product_id: item.product_id,
+          quantity: item.quantity,
+          name: product.name,
+          scientific_name: product.scientific_name,
+          price: parseInt(product.price),
+          image: product.image
+        };
 
-  //       const cartItem = {
-  //         key: item.product_id,
-  //         product_id: item.product_id,
-  //         quantity: item.quantity,
-  //         name: product.name,
-  //         scientific_name: product.scientific_name,
-  //         price: product.price,
-  //       };
+        cart.push(cartItem);
+      }
 
-  //       cart.push(cartItem);
-  //     }
+      const priceTotal = cart.reduce((total, item) => total + item.price * item.quantity, 0);
 
-  //     const priceTotal = cart.reduce((total, item) => total + item.price * item.quantity, 0);
-
-  //     setCart(cart);
-  //     setPriceTotal(priceTotal);
-  //   }
-  //   fetchApi();
-  // }, []);
-
-  const cart = [
-    {
-      key: "1",
-      product_id: "1",
-      quantity: 3,
-      id: "1",
-      name: "Cây cỏ",
-      scientific_name: "Cây cỏ khoa học",
-      price: 1020,
-      stock: 10
-    },
-    {
-      key: "2",
-      product_id: "2",
-      quantity: 2,
-      id: "2",
-      name: "Cây lài",
-      scientific_name: "Cây lài khoa học",
-      price: 1010,
-      stock: 10
+      setCart(cart);
+      setPriceTotal(priceTotal);
     }
-  ];
-  const priceTotal = 2000;
+    fetchApi();
+  }, []);
+
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+  }, []);
 
   const columns = [
     {
-      title: 'Name',
+      title: "Ảnh",
+      key: "image",
+      render: (_: any, record: any) => (
+        <div style={{ width: "60%" }}>
+          <Image
+            src={record.image}
+            alt={record.name}
+            width={100}
+            height={100}
+            style={{ objectFit: 'contain' }}
+          />
+        </div>
+      )
+    },
+    {
+      title: 'Tên',
       dataIndex: 'name',
       key: 'name',
     },
     {
-      title: 'Scientific name',
+      title: 'Tên khoa học',
       dataIndex: 'scientific_name',
       key: 'scientific_name',
     },
     {
-      title: 'Price',
+      title: 'Giá',
       dataIndex: 'price',
       key: 'price',
     },
     {
-      title: 'Stock',
-      dataIndex: 'stock',
-      key: 'stock',
+      title: 'Số lượng',
+      dataIndex: 'quantity',
+      key: 'quantity',
     }
   ];
 
   return (
     <React.Fragment>
       <div style={{ padding: '0 50px', marginTop: 64, marginBottom: 64 }}>
-        <Modal title="Choose checkout type" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
-          <div style={{
-            display: "flex",
-            justifyContent: "center",
-            padding: "30px 0"
-          }}>
-            <Button
-              type="default"
-              style={{
-                marginRight: "30px"
-              }}
-              onClick={() => { }}
-            >
-              Cash on delivery
-            </Button>
-
-            <Button
-              type="primary"
-              onClick={() => router.push("/checkout")}
-            >
-              Checkout online
-            </Button>
-          </div>
-        </Modal>
-        
         <GoBack />
 
         <h1 style={{
@@ -137,32 +103,41 @@ function Cart() {
           marginBottom: "30px",
           fontWeight: "bold"
         }}>
-          Cart
+          Giỏ Hàng
         </h1>
 
-        <Table dataSource={cart} columns={columns} />
+        {cart.length ? (
+          <>
+            <Table dataSource={cart} columns={columns} />
 
-        <h2 style={{
-          fontSize: "36px",
-          fontWeight: "bold",
-          color: "green",
-          textAlign: "end"
-        }}>
-          Price Total: {priceTotal}000 vnd
-        </h2>
+            <h2 style={{
+              fontSize: "36px",
+              fontWeight: "bold",
+              color: "green",
+              textAlign: "end"
+            }}>
+              Tổng tiền: {formatVND(priceTotal)}
+            </h2>
 
-        <div style={{
-          display: "flex",
-          justifyContent: "center",
-          marginTop: "30px"
-        }}>
-          <Button
-            type="primary"
-            onClick={() => showModal()}
-          >
-            Checkout
-          </Button>
-        </div>
+            <div style={{
+              display: "flex",
+              justifyContent: "center",
+              marginTop: "30px"
+            }}>
+              <Button
+                type="primary"
+                onClick={() => router.push("/order")}
+              >
+                Đặt hàng
+              </Button>
+            </div>
+          </>
+        ) : (
+          <>
+            <Text type="warning">Giỏ hàng trống</Text>
+          </>
+        )}
+
 
       </div>
     </React.Fragment>

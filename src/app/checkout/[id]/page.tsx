@@ -9,100 +9,113 @@ import GoBack from "@/components/ui/GoBack/page";
 
 import { getProduct } from "@/services/product";
 
-import { getCookie, setCookie } from "@/helpers/cookies";
+import { deleteCookie, getCookie } from "@/helpers/cookies";
 import { toast } from "react-toastify";
 import { generateVietQr } from "@/helpers/generate";
+import { formatVND } from "@/helpers/formatCurrency";
+import { updateStatus } from "@/services/order";
 
-function Checkout() {
+interface props {
+  params: {
+    id: string
+  }
+};
+
+function Checkout(props: props) {
+  const orderId = props.params.id;
+
   const router = useRouter();
 
   const [isModalOpen, setIsModalOpen] = useState(true);
   const showModal = () => {
     setIsModalOpen(true);
   };
-  const handleOk = () => {
+  const handleOk = async () => {
     setIsModalOpen(false);
 
+    await updateStatus(orderId, "PAID");
+
+    deleteCookie("my_cart");
+
     toast.success("Checkout success");
-    router.push("/orders");
+    router.push("/products");
   };
   const handleCancel = () => {
     setIsModalOpen(false);
   };
 
-  // const [cart, setCart] = useState([]);
-  // const [priceTotal, setPriceTotal] = useState(0);
-  // useEffect(() => {
-  //   const fetchApi = async () => {
-  //     const cart = [];
-  //     const myCart = JSON.parse(getCookie("my_cart"));
-  //     for (const item of myCart) {
-  //       const product = await getProduct(item.product_id);
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+  }, []);
 
-  //       const cartItem = {
-  //         key: item.product_id,
-  //         product_id: item.product_id,
-  //         quantity: item.quantity,
-  //         name: product.name,
-  //         scientific_name: product.scientific_name,
-  //         price: product.price,
-  //       };
+  const [cart, setCart] = useState<any>([]);
+  const [priceTotal, setPriceTotal] = useState(0);
+  useEffect(() => {
+    const fetchApi = async () => {
+      const cart = [];
+      const myCart = JSON.parse(getCookie("my_cart"));
+      for (const item of myCart) {
+        const product = await getProduct(item.product_id);
 
-  //       cart.push(cartItem);
-  //     }
+        const cartItem = {
+          key: item.product_id,
+          product_id: item.product_id,
+          quantity: item.quantity,
+          name: product.name,
+          scientific_name: product.scientific_name,
+          price: parseInt(product.price),
+          image: product.image
+        };
 
-  //     const priceTotal = cart.reduce((total, item) => total + item.price * item.quantity, 0);
+        cart.push(cartItem);
+      }
 
-  //     setCart(cart);
-  //     setPriceTotal(priceTotal);
-  //   }
-  //   fetchApi();
-  // }, []);
+      const priceTotal = cart.reduce((total, item) => total + item.price * item.quantity, 0);
 
-  const cart = [
-    {
-      key: "1",
-      product_id: "1",
-      quantity: 3,
-      id: "1",
-      name: "Cây cỏ",
-      scientific_name: "Cây cỏ khoa học",
-      price: 1020,
-      stock: 10
-    },
-    {
-      key: "2",
-      product_id: "2",
-      quantity: 2,
-      id: "2",
-      name: "Cây lài",
-      scientific_name: "Cây lài khoa học",
-      price: 1010,
-      stock: 10
+      setCart(cart);
+      setPriceTotal(priceTotal);
     }
-  ];
-  const priceTotal = 2000;
+    fetchApi();
+  }, [orderId]);
 
   const columns = [
     {
-      title: 'Name',
+      title: "Ảnh",
+      key: "image",
+      render: (_: any, record: any) => (
+        <div style={{ width: "60%" }}>
+          <Image
+            src={record.image}
+            alt={record.name}
+            width={100}
+            height={100}
+            style={{ objectFit: 'contain' }}
+          />
+        </div>
+      )
+    },
+    {
+      title: 'Tên',
       dataIndex: 'name',
       key: 'name',
     },
     {
-      title: 'Scientific name',
+      title: 'Tên khoa học',
       dataIndex: 'scientific_name',
       key: 'scientific_name',
     },
     {
-      title: 'Price',
+      title: 'Giá',
       dataIndex: 'price',
       key: 'price',
     },
     {
-      title: 'Stock',
-      dataIndex: 'stock',
-      key: 'stock',
+      title: 'Số lượng',
+      dataIndex: 'quantity',
+      key: 'quantity',
     }
   ];
 
@@ -110,7 +123,7 @@ function Checkout() {
     <React.Fragment>
       <div style={{ padding: '0 50px', marginTop: 64, marginBottom: 64 }}>
         <Modal
-          title="VietQR Checkout"
+          title="Mã QR chuyển khoản"
           open={isModalOpen}
           onOk={handleOk}
           onCancel={handleCancel}
@@ -122,7 +135,8 @@ function Checkout() {
           }}>
             <Image
               src={
-                generateVietQr(1000,
+                generateVietQr(
+                  priceTotal,
                   "thanh%20toan",
                   "Nguyen%20Duong%20Trong%20Tin"
                 )
@@ -140,7 +154,7 @@ function Checkout() {
           marginBottom: "30px",
           fontWeight: "bold"
         }}>
-          Checkout
+          Thanh Toán Online
         </h1>
 
         <Table dataSource={cart} columns={columns} />
@@ -151,7 +165,7 @@ function Checkout() {
           color: "green",
           textAlign: "end"
         }}>
-          Price Total: {priceTotal}000 vnd
+          Tổng Tiền: {formatVND(priceTotal)}
         </h2>
 
         <div style={{
@@ -163,7 +177,7 @@ function Checkout() {
             type="primary"
             onClick={() => showModal()}
           >
-            Open QR
+            Mở mã QR
           </Button>
         </div>
       </div>

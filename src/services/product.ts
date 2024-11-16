@@ -20,6 +20,13 @@ export const updateProduct = async (id: string, options: any) => {
     return result;
 }
 
+export const updateStockProduct = async (id: string, stock: number) => {
+    const result = await patch("products/update-stock/", id, {
+        stock: stock
+    });
+    return result;
+}
+
 export const deleteProduct = async (id: string) => {
     await del("products/delete/", id);
 }
